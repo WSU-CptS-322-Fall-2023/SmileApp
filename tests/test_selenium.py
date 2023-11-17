@@ -1,36 +1,32 @@
 import pytest
+
 from selenium import webdriver
-from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from time import sleep
 
-# User fixure
+# User fixure - 1
 @pytest.fixture
 def user1():
     return  {'username':'arslanay', 'email':'arslanay@wsu.edu', 'password':'strongpassword'}
 
-# User fixure
+# User fixure - 2
 @pytest.fixture
 def user2():
     return  {'username':'john', 'email':'john@wsu.edu', 'password':'alsostrongpassword'}
 
-# User fixures
-@pytest.fixture
-def user2():
-    return  {'username':'john', 'email':'john@wsu.edu', 'password':'alsostrongpassword'}
-
- # Post fixure
+ # Post fixure - 1
 @pytest.fixture
 def post1():
     return {'title': 'My cat Cookie', 
             'body': 'My cat Cookie and his girlfriend Chia watch the sunset together everyday. I need to go home before sunset to let her out. Sometimes when I get home, I find Chia outside of our front window staring at Cookie at the window.' , 
             'happiness_level': "Happy"}
 
- # Post fixure
+ # Post fixure - 2
 @pytest.fixture
 def post2():
     return {'title': 'Stolen book', 
@@ -61,13 +57,16 @@ Download the chrome driver and make sure you have chromedriver executable in you
 To download the ChromeDriver to your system navigate to its download page. 
 https://chromedriver.chromium.org/downloads  
 """
+
 @pytest.fixture
 def browser():
     CHROME_PATH = "c:\\Webdriver"
     print(CHROME_PATH)
-    opts = Options()
-    opts.headless = False
-    driver = webdriver.Chrome(options=opts, executable_path = CHROME_PATH + '\chromedriver.exe')
+
+    service = Service(executable_path = CHROME_PATH + '\\chromedriver.exe')
+    options = webdriver.ChromeOptions()
+    options.headless = False
+    driver = webdriver.Chrome(service=service, options=options)
     driver.implicitly_wait(10)
     
     yield driver
@@ -77,20 +76,19 @@ def browser():
 
 
 def test_register_form(browser,user2):
-    # test_user_1 = {'username':'ay1', 'email':'arslanay@wsu.edu', 'password':'strongpassword'}
 
     browser.get('http://localhost:5000/register')
     # Enable this to maximize the window
     # browser.maximize_window()
-    browser.find_element_by_name("username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
     sleep(2)
-    browser.find_element_by_name("email").send_keys(user2['email'])
+    browser.find_element(By.NAME, "email").send_keys(user2['email'])
     sleep(2)
-    browser.find_element_by_name("password").send_keys(user2['password'])
+    browser.find_element(By.NAME, "password").send_keys(user2['password'])
     sleep(2)
-    browser.find_element_by_name("password2").send_keys(user2['password'])    
+    browser.find_element(By.NAME, "password2").send_keys(user2['password'])    
     sleep(2)
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "submit").click()
     sleep(5)
     #verification
     content = browser.page_source
@@ -99,15 +97,15 @@ def test_register_form(browser,user2):
 
 def test_register_error(browser,user2):
     browser.get('http://localhost:5000/register')
-    browser.find_element_by_name("username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
     sleep(2)
-    browser.find_element_by_name("email").send_keys(user2['email'])
+    browser.find_element(By.NAME, "email").send_keys(user2['email'])
     sleep(2)
-    browser.find_element_by_name("password").send_keys(user2['password'])
+    browser.find_element(By.NAME, "password").send_keys(user2['password'])
     sleep(2)
-    browser.find_element_by_name("password2").send_keys(user2['password'])    
+    browser.find_element(By.NAME, "password2").send_keys(user2['password'])    
     sleep(2)
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "submit").click()
     sleep(5)
     #verification
     content = browser.page_source
@@ -116,13 +114,13 @@ def test_register_error(browser,user2):
 
 def test_login_form(browser,user2):
     browser.get('http://localhost:5000/login')
-    browser.find_element_by_name("username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
     sleep(2)
-    browser.find_element_by_name("password").send_keys(user2['password'])
+    browser.find_element(By.NAME, "password").send_keys(user2['password'])
     sleep(2)
-    browser.find_element_by_name("remember_me").click()
+    browser.find_element(By.NAME, "remember_me").click()
     sleep(2)
-    button = browser.find_element_by_name("submit").click()
+    button = browser.find_element(By.NAME, "submit").click()
     sleep(5)
     #verification
     content = browser.page_source
@@ -131,13 +129,13 @@ def test_login_form(browser,user2):
 
 def test_invalidlogin(browser,user2):
     browser.get('http://localhost:5000/login')
-    browser.find_element_by_name("username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
     sleep(2)
-    browser.find_element_by_name("password").send_keys('wrongpassword')
+    browser.find_element(By.NAME, "password").send_keys('wrongpassword')
     sleep(2)
-    browser.find_element_by_name("remember_me").click()
+    browser.find_element(By.NAME, "remember_me").click()
     sleep(2)
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "submit").click()
     sleep(5)
     #verification
     content = browser.page_source
@@ -147,21 +145,21 @@ def test_invalidlogin(browser,user2):
 def test_post_smile(browser,user2,post1):
     #first login
     browser.get('http://localhost:5000/login')
-    browser.find_element_by_name("username").send_keys(user2['username'])
-    browser.find_element_by_name("password").send_keys(user2['password'])
-    browser.find_element_by_name("remember_me").click()
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "password").send_keys(user2['password'])
+    browser.find_element(By.NAME, "remember_me").click()
+    browser.find_element(By.NAME, "submit").click()
 
     browser.get('http://localhost:5000/postsmile')
-    browser.find_element_by_name("title").send_keys(post1['title'])
+    browser.find_element(By.NAME, "title").send_keys(post1['title'])
     sleep(2)
-    browser.find_element_by_name("body").send_keys(post1['body'])
+    browser.find_element(By.NAME, "body").send_keys(post1['body'])
     sleep(2)
-    Select(browser.find_element_by_name("happiness_level")).select_by_visible_text(post1['happiness_level'])
+    Select(browser.find_element(By.NAME, "happiness_level")).select_by_visible_text(post1['happiness_level'])
     sleep(2)
-    tags = browser.find_element_by_name("tag").click()
+    tags = browser.find_element(By.NAME, "tag").click()
     sleep(2)
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "submit").click()
     sleep(5)
     #verification
     content = browser.page_source
@@ -171,21 +169,21 @@ def test_post_smile(browser,user2,post1):
 def post_smile2(browser,user2,post2):
     #first login
     browser.get('http://localhost:5000/login')
-    browser.find_element_by_name("username").send_keys(user2['username'])
-    browser.find_element_by_name("password").send_keys(user2['password'])
-    browser.find_element_by_name("remember_me").click()
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "password").send_keys(user2['password'])
+    browser.find_element(By.NAME, "remember_me").click()
+    browser.find_element(By.NAME, "submit").click()
 
     browser.get('http://localhost:5000/postsmile')
-    browser.find_element_by_name("title").send_keys(post2['title'])
+    browser.find_element(By.NAME, "title").send_keys(post2['title'])
     sleep(2)
-    browser.find_element_by_name("body").send_keys(post2['body'])
+    browser.find_element(By.NAME, "body").send_keys(post2['body'])
     sleep(2)
-    Select(browser.find_element_by_name("happiness_level")).select_by_visible_text(post2['happiness_level'])
+    Select(browser.find_element(By.NAME, "happiness_level")).select_by_visible_text(post2['happiness_level'])
     sleep(2)
-    tags = browser.find_element_by_name("tag").click()
+    tags = browser.find_element(By.NAME, "tag").click()
     sleep(2)
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "submit").click()
     sleep(5)
     #verification
     content = browser.page_source
@@ -195,21 +193,21 @@ def post_smile2(browser,user2,post2):
 def test_post_smile_error(browser,user2,post3):
     #first login
     browser.get('http://localhost:5000/login')
-    browser.find_element_by_name("username").send_keys(user2['username'])
-    browser.find_element_by_name("password").send_keys(user2['password'])
-    browser.find_element_by_name("remember_me").click()
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "username").send_keys(user2['username'])
+    browser.find_element(By.NAME, "password").send_keys(user2['password'])
+    browser.find_element(By.NAME, "remember_me").click()
+    browser.find_element(By.NAME, "submit").click()
 
     browser.get('http://localhost:5000/postsmile')
-    browser.find_element_by_name("title").send_keys(post3['title'])
+    browser.find_element(By.NAME, "title").send_keys(post3['title'])
     sleep(2)
-    browser.find_element_by_name("body").send_keys(post3['body'])
+    browser.find_element(By.NAME, "body").send_keys(post3['body'])
     sleep(2)
-    Select(browser.find_element_by_name("happiness_level")).select_by_visible_text(post3['happiness_level'])
+    Select(browser.find_element(By.NAME, "happiness_level")).select_by_visible_text(post3['happiness_level'])
     sleep(2)
-    tags = browser.find_element_by_name("tag").click()
+    tags = browser.find_element(By.NAME, "tag").click()
     sleep(2)
-    browser.find_element_by_name("submit").click()
+    browser.find_element(By.NAME, "submit").click()
     sleep(10)
     #verification
     content = browser.page_source
@@ -217,4 +215,4 @@ def test_post_smile_error(browser,user2,post3):
 
 
 if __name__ == "__main__":
-    retcode = pytest.main()
+    retcode = pytest.main(verbose=2)
